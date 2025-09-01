@@ -322,6 +322,7 @@ __contract__(
   mld_polyveck w2, w1, w0, h;
   mld_poly cp;
   uint32_t z_invalid, w0_invalid, h_invalid;
+  int res;
 
   /* Sample intermediate vector y */
   mld_polyvecl_uniform_gamma1(&y, rhoprime, nonce);
@@ -363,16 +364,8 @@ __contract__(
   MLD_CT_TESTING_DECLASSIFY(&z_invalid, sizeof(uint32_t));
   if (z_invalid)
   {
-    /* FIPS 204. Section 3.6.3 Destruction of intermediate values. */
-    mld_zeroize(challenge_bytes, MLDSA_CTILDEBYTES);
-    mld_zeroize(&y, sizeof(y));
-    mld_zeroize(&z, sizeof(z));
-    mld_zeroize(&w2, sizeof(w2));
-    mld_zeroize(&w1, sizeof(w1));
-    mld_zeroize(&w0, sizeof(w0));
-    mld_zeroize(&h, sizeof(h));
-    mld_zeroize(&cp, sizeof(cp));
-    return -1; /* reject */
+    res = -1; /* reject */
+    goto cleanup;
   }
 
   /* If z is valid, then its coefficients are bounded by  */
@@ -394,16 +387,8 @@ __contract__(
   MLD_CT_TESTING_DECLASSIFY(&w0_invalid, sizeof(uint32_t));
   if (w0_invalid)
   {
-    /* FIPS 204. Section 3.6.3 Destruction of intermediate values. */
-    mld_zeroize(challenge_bytes, sizeof(challenge_bytes));
-    mld_zeroize(&y, sizeof(y));
-    mld_zeroize(&z, sizeof(z));
-    mld_zeroize(&w2, sizeof(w2));
-    mld_zeroize(&w1, sizeof(w1));
-    mld_zeroize(&w0, sizeof(w0));
-    mld_zeroize(&h, sizeof(h));
-    mld_zeroize(&cp, sizeof(cp));
-    return -1; /* reject */
+    res = -1; /* reject */
+    goto cleanup;
   }
 
   /* Compute hints for w1 */
@@ -416,16 +401,8 @@ __contract__(
   MLD_CT_TESTING_DECLASSIFY(&h_invalid, sizeof(uint32_t));
   if (h_invalid)
   {
-    /* FIPS 204. Section 3.6.3 Destruction of intermediate values. */
-    mld_zeroize(challenge_bytes, MLDSA_CTILDEBYTES);
-    mld_zeroize(&y, sizeof(y));
-    mld_zeroize(&z, sizeof(z));
-    mld_zeroize(&w2, sizeof(w2));
-    mld_zeroize(&w1, sizeof(w1));
-    mld_zeroize(&w0, sizeof(w0));
-    mld_zeroize(&h, sizeof(h));
-    mld_zeroize(&cp, sizeof(cp));
-    return -1; /* reject */
+    res = -1; /* reject */
+    goto cleanup;
   }
 
   mld_polyveck_add(&w0, &h);
@@ -443,16 +420,8 @@ __contract__(
   n = mld_polyveck_make_hint(&h, &w0, &w2);
   if (n > MLDSA_OMEGA)
   {
-    /* FIPS 204. Section 3.6.3 Destruction of intermediate values. */
-    mld_zeroize(challenge_bytes, MLDSA_CTILDEBYTES);
-    mld_zeroize(&y, sizeof(y));
-    mld_zeroize(&z, sizeof(z));
-    mld_zeroize(&w2, sizeof(w2));
-    mld_zeroize(&w1, sizeof(w1));
-    mld_zeroize(&w0, sizeof(w0));
-    mld_zeroize(&h, sizeof(h));
-    mld_zeroize(&cp, sizeof(cp));
-    return -1; /* reject */
+    res = -1; /* reject */
+    goto cleanup;
   }
 
   /* All is well - write signature */
@@ -462,6 +431,9 @@ __contract__(
   MLD_CT_TESTING_DECLASSIFY(&z, sizeof(z));
   mld_pack_sig(sig, challenge_bytes, &z, &h, n);
 
+  res = 0; /* success */
+
+cleanup:
   /* FIPS 204. Section 3.6.3 Destruction of intermediate values. */
   mld_zeroize(challenge_bytes, MLDSA_CTILDEBYTES);
   mld_zeroize(&y, sizeof(y));
@@ -472,7 +444,7 @@ __contract__(
   mld_zeroize(&h, sizeof(h));
   mld_zeroize(&cp, sizeof(cp));
 
-  return 0; /* success */
+  return res;
 }
 MLD_MUST_CHECK_RETURN_VALUE
 int crypto_sign_signature_internal(uint8_t *sig, size_t *siglen,
