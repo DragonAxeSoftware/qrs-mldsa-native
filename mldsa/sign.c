@@ -319,7 +319,7 @@ __contract__(
   uint8_t challenge_bytes[MLDSA_CTILDEBYTES];
   unsigned int n;
   mld_polyvecl y, z;
-  mld_polyveck w2, w1, w0, h;
+  mld_polyveck w, w1, w0, h;
   mld_poly cp;
   uint32_t z_invalid, w0_invalid, h_invalid;
   int res;
@@ -330,14 +330,14 @@ __contract__(
   /* Matrix-vector multiplication */
   z = y;
   mld_polyvecl_ntt(&z);
-  mld_polyvec_matrix_pointwise_montgomery(&w1, mat, &z);
-  mld_polyveck_reduce(&w1);
-  mld_polyveck_invntt_tomont(&w1);
+  mld_polyvec_matrix_pointwise_montgomery(&w, mat, &z);
+  mld_polyveck_reduce(&w);
+  mld_polyveck_invntt_tomont(&w);
 
   /* Decompose w and call the random oracle */
-  mld_polyveck_caddq(&w1);
-  mld_polyveck_decompose(&w2, &w0, &w1);
-  mld_polyveck_pack_w1(sig, &w2);
+  mld_polyveck_caddq(&w);
+  mld_polyveck_decompose(&w1, &w0, &w);
+  mld_polyveck_pack_w1(sig, &w1);
 
   mld_H(challenge_bytes, MLDSA_CTILDEBYTES, mu, MLDSA_CRHBYTES, sig,
         MLDSA_K * MLDSA_POLYW1_PACKEDBYTES, NULL, 0);
@@ -416,8 +416,8 @@ __contract__(
    * For a more detailed discussion, refer to https://eprint.iacr.org/2022/1406.
    */
   MLD_CT_TESTING_DECLASSIFY(&w0, sizeof(w0));
-  MLD_CT_TESTING_DECLASSIFY(&w2, sizeof(w2));
-  n = mld_polyveck_make_hint(&h, &w0, &w2);
+  MLD_CT_TESTING_DECLASSIFY(&w1, sizeof(w1));
+  n = mld_polyveck_make_hint(&h, &w0, &w1);
   if (n > MLDSA_OMEGA)
   {
     res = -1; /* reject */
@@ -438,7 +438,7 @@ cleanup:
   mld_zeroize(challenge_bytes, MLDSA_CTILDEBYTES);
   mld_zeroize(&y, sizeof(y));
   mld_zeroize(&z, sizeof(z));
-  mld_zeroize(&w2, sizeof(w2));
+  mld_zeroize(&w, sizeof(w));
   mld_zeroize(&w1, sizeof(w1));
   mld_zeroize(&w0, sizeof(w0));
   mld_zeroize(&h, sizeof(h));
