@@ -1,3 +1,74 @@
+# Ignore build artifacts
+/build/
+/conan_test_build/
+/conan_build/
+/out/
+test/build/
+
+# Object files, static and shared libs
+*.o
+*.lo
+*.obj
+*.a
+*.la
+*.so
+*.dylib
+*.dll
+
+# Dependency files, coverage and profiling
+*.d
+*.gcno
+*.gcda
+*.lcov
+coverage/
+.coverage
+.prof
+
+# Linker map, temporary and intermediate
+*.map
+*.tmp
+*.bak
+
+# Binaries
+/bin/
+*.exe
+
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln
+*.swp
+*~
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Node/npm
+node_modules/
+
+# nix/flake and build artifacts
+result/
+.direnv/
+
+# Logs
+*.log
+
+# generated files from tools
+*.i
+*.ii
+*.s
+
+# Misc
+.cache/
+.tmp/
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 test/build
