@@ -25,11 +25,7 @@ this notice will be removed.
 sudo apt-get update
 sudo apt-get install make gcc python3 git
 
-# Clone mldsa-native
-git clone https://github.com/pq-code-package/mldsa-native.git
-cd mldsa-native
-
-# Build and run tests
+# Build and run tests using make
 make build
 make test
 
@@ -38,6 +34,38 @@ make test
 # Show all options
 ./scripts/tests --help
 ```
+
+## Prerequisite
+
+Linux development environment or WSL.
+
+Linux environment or WSL.
+Conan V2
+Python
+C++ >= 11.4.0
+
+## Development
+
+Build using conan:
+
+    conan install . --build=missing
+
+Create package:
+    
+    conan create .
+
+Test package (build and create the main package first and make sure the version is correct):
+
+    ./scripts/build-run-tests.sh
+
+
+## Push to private dev repository
+
+    conan remote add qrs-conan-dev-local https://dragonaxe.jfrog.io/artifactory/api/conan/qrs-conan-dev-local
+
+    conan remote login -p <token> qrs-conan-dev-local <username>
+
+    conan upload qrscore/<optional version> -r qrs-conan-dev-local --confirm
 
 ## Formal Verification
 
