@@ -69,6 +69,22 @@ __contract__(
   ensures(return_value == 0 || return_value == -1)
 );
 
+/* Deterministic keypair generation from an explicit seed. The seed must
+ * be exactly MLDSA_SEEDBYTES long; callers may pass arbitrary data but the
+ * implementation will return -1 if seedlen != MLDSA_SEEDBYTES. */
+#define crypto_sign_seed_keypair MLD_NAMESPACE(seed_keypair)
+MLD_MUST_CHECK_RETURN_VALUE
+int crypto_sign_seed_keypair(const uint8_t *seed, size_t seedlen,
+                             uint8_t *pk, uint8_t *sk)
+__contract__(
+  requires(memory_no_alias(pk, CRYPTO_PUBLICKEYBYTES))
+  requires(memory_no_alias(sk, CRYPTO_SECRETKEYBYTES))
+  requires(memory_no_alias(seed, seedlen))
+  assigns(object_whole(pk))
+  assigns(object_whole(sk))
+  ensures(return_value == 0 || return_value == -1)
+);
+
 #define crypto_sign_signature_internal MLD_NAMESPACE(signature_internal)
 /*************************************************
  * Name:        crypto_sign_signature_internal

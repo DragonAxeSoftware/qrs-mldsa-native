@@ -6,7 +6,7 @@ from conan import ConanFile
 
 class MldsaConan(ConanFile):
     name = "qrs-mldsa-native"
-    version = "0.1.0"
+    version = "0.2.0"
     license = "Apache-2.0 OR ISC OR MIT"
     url = "https://github.com/pq-code-package/mldsa-native"
     description = "ML-DSA post-quantum signature implementation (native C)"

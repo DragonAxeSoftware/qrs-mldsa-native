@@ -65,7 +65,7 @@ Test package (build and create the main package first and make sure the version 
 
     conan remote login -p <token> qrs-conan-dev-local <username>
 
-    conan upload qrscore/<optional version> -r qrs-conan-dev-local --confirm
+    conan upload qrs-mldsa-native -r qrs-conan-dev-local --confirm
 
 ## Formal Verification
 

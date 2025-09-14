@@ -208,6 +208,20 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk)
   return result;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
+int crypto_sign_seed_keypair(const uint8_t *seed, size_t seedlen,
+                             uint8_t *pk, uint8_t *sk)
+{
+  /* Validate seed length */
+  if (seedlen != MLDSA_SEEDBYTES)
+  {
+    return -1;
+  }
+
+  /* Call internal deterministic generator */
+  return crypto_sign_keypair_internal(pk, sk, seed);
+}
+
 /*************************************************
  * Name:        mld_H
  *

@@ -6,8 +6,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "../mldsa/api.h"
-#include "../mldsa/sys.h"
+#include "../mldsa/sign.h"
 #include "notrandombytes/notrandombytes.h"
 
 #ifndef NTESTS
@@ -237,6 +236,42 @@ static int test_wrong_ctx(void)
   return 0;
 }
 
+/* Use a local test constant for seed length to avoid including params.h
+ * (which pulls in common headers in an order that breaks native backends). */
+#define TEST_SEEDBYTES 32
+
+static int test_seed_keypair(void)
+{
+  uint8_t seed[TEST_SEEDBYTES];
+  uint8_t pk1[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk1[CRYPTO_SECRETKEYBYTES];
+  uint8_t pk2[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk2[CRYPTO_SECRETKEYBYTES];
+  size_t i;
+
+  /* Use a fixed, deterministic seed pattern */
+  for (i = 0; i < TEST_SEEDBYTES; i++)
+  {
+    seed[i] = (uint8_t)(i * 97 + 13);
+  }
+
+  CHECK(crypto_sign_seed_keypair(seed, TEST_SEEDBYTES, pk1, sk1) == 0);
+  CHECK(crypto_sign_seed_keypair(seed, TEST_SEEDBYTES, pk2, sk2) == 0);
+
+  if (memcmp(pk1, pk2, CRYPTO_PUBLICKEYBYTES) != 0)
+  {
+    printf("ERROR: seed_keypair - public keys differ\n");
+    return 1;
+  }
+  if (memcmp(sk1, sk2, CRYPTO_SECRETKEYBYTES) != 0)
+  {
+    printf("ERROR: seed_keypair - secret keys differ\n");
+    return 1;
+  }
+
+  return 0;
+}
+
 int main(void)
 {
   unsigned i;
@@ -252,6 +287,7 @@ int main(void)
     r |= test_wrong_pk();
     r |= test_wrong_sig();
     r |= test_wrong_ctx();
+    r |= test_seed_keypair();
     if (r)
     {
       return 1;
