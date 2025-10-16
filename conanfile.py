@@ -6,7 +6,7 @@ from conan import ConanFile
 
 class MldsaConan(ConanFile):
     name = "qrs-mldsa-native"
-    version = "0.2.0"
+    version = "0.2.1"
     license = "Apache-2.0 OR ISC OR MIT"
     url = "https://github.com/pq-code-package/mldsa-native"
     description = "ML-DSA post-quantum signature implementation (native C)"
@@ -94,6 +94,27 @@ class MldsaConan(ConanFile):
         self.cpp_info.libdirs = ["lib"]
         self.cpp_info.bindirs = ["bin"]
         self.cpp_info.includedirs = ["include"]
+        # Detect actual library files present in the package lib/ directory and
+        # expose only those to consumers. This prevents advertising a generic
+        # "mldsa" (-lmldsa) when the package only provides variant-specific
+        # archives like libmldsa44.a, libmldsa65.a, libmldsa87.a.
+        libs = []
+        try:
+            import os
+            libdir = os.path.join(self.package_folder, "lib")
+            if os.path.isdir(libdir):
+                # Find files like libmldsa*.a and map to linker names without
+                # the 'lib' prefix and '.a' suffix.
+                for fname in sorted(os.listdir(libdir)):
+                    if fname.startswith("libmldsa") and fname.endswith(".a"):
+                        lname = fname[3:-2]  # strip 'lib' and '.a'
+                        libs.append(lname)
+        except Exception:
+            # Fall back to a conservative default if anything goes wrong.
+            libs = ["mldsa87", "mldsa65", "mldsa44"]
 
-        # List libs in a conservative order. Consumers can pick the ones they need.
-        self.cpp_info.libs = ["mldsa", "mldsa87", "mldsa65", "mldsa44"]
+        # If no libs were detected, keep a sensible default to avoid empty lists.
+        if not libs:
+            libs = ["mldsa87", "mldsa65", "mldsa44"]
+
+        self.cpp_info.libs = libs
