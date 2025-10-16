@@ -1,0 +1,39 @@
+name: qrs-dev Publish
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash -euxo pipefail {0}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Instal host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install make gcc python3 git
+      - name: Run tests
+        run: |
+          make test
+      - name: Install Conan v2 and setup remotes
+        run: |
+          pip install "conan<3"
+          conan --version
+          conan profile detect --force
+          conan remote add qrs-conan-dev-local https://dragonaxe.jfrog.io/artifactory/api/conan/qrs-conan-dev-local
+          conan remote login -p ${{ secrets.ARTIFACTORY_DEV_TOKEN }} qrs-conan-dev-local ${{ secrets.ARTIFACTORY_DEV_USERNAME }}
+      - name: Install dependencies
+        run: |
+          conan install . --build=missing
+      - name: Build and create Conan package
+        run: |
+          conan create . --build=missing
+      - name: Publish package to remote
+        run: |
+          conan upload qrs-mldsa-native -r qrs-conan-dev-local --confirm
