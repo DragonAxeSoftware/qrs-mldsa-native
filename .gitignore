@@ -5,6 +5,11 @@
 /out/
 test/build/
 
+# conan artifacts
+conanbuild*
+conanrun*
+deactivate_conan*
+
 # Object files, static and shared libs
 *.o
 *.lo
