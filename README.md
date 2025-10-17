@@ -44,7 +44,7 @@ Conan V2
 Python
 C++ >= 11.4.0
 
-## Development
+## Local development
 
 Build using conan:
 
@@ -54,11 +54,6 @@ Create package:
     
     conan create .
 
-Test package (build and create the main package first and make sure the version is correct):
-
-    ./scripts/build-run-tests.sh
-
-
 ## Push to private dev repository
 
     conan remote add qrs-conan-dev-local https://dragonaxe.jfrog.io/artifactory/api/conan/qrs-conan-dev-local
@@ -66,6 +61,10 @@ Test package (build and create the main package first and make sure the version 
     conan remote login -p <token> qrs-conan-dev-local <username>
 
     conan upload qrs-mldsa-native -r qrs-conan-dev-local --confirm
+
+## Use the QRS worflow (nektos act required), here for the dev environment
+
+    act -s ARTIFACTORY_DEV_TOKEN -s ARTIFACTORY_DEV_USERNAME -W .github/workflows/qrs-dev.yml
 
 ## Formal Verification
 
